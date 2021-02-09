@@ -79,11 +79,11 @@ services:
     command: python3 start.sh
 
 
-  #fallback:
-  #  image: debian
-  #  command: sleep 36000
-    #volumes:
-    #  - myothervolume:/mnt
+  fallback:
+    image: debian
+    command: sleep 36000
+    volumes:
+      - myothervolume:/mnt
 
 volumes:
   mystorage:
