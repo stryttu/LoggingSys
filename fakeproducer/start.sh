@@ -1,0 +1,11 @@
+import kafka_producer_interactive as kpi
+send=kpi.producer()
+send('http_errors', value={'timestamp': '20202020312131', 'sourceIp' : 'sourceIp', 'service' : 'products', 'request' : 'path + method', 'error' : 'error'})
+send('order_validation', value={'timestamp': '20202020312131', 'status' : 'status_code', 'orderId' : 'id', 'extraArgs' : {'argu': 'mio1', 'argd' : 'mio2'}})
+send('order_paid_validation_failure', value={'orderId': 'orderId', 'userId' : 'userId', 'amountPaid' : '27.5', 'extraArgs' : {'error': 'arg1', 'error1' : 'arg2'}})
+send('invoice_unavailable', value={'timestamp': '20202020312131', 'orderId' : 'orderId', 'userId' : 'userId', 'amountPaid' : '31.5', 'extraArgs' : {'arg1': 'arg1', 'arg2' : 'arg2'}})
+send('shipping_unavailable', value={'timestamp': '20202020312131', 'orderId' : 'orderId', 'userId' : 'userId', 'amountPaid' : '31.5', 'extraArgs' : {'arg1': 'arg1', 'arg2' : 'arg2'}})
+send('service_down', value={'time': '20202020312131', 'status' : 'serviceDown', 'service' : 'hostname'})
+send('service_down', value={'time': '20202020312133', 'status' : 'dbStatus', 'service' : 'hostname'})
+send('service_down', value={'time': '20202020312135', 'status' : 'serviceDown', 'service' : 'hostname'})
+send('service_down', value={'time': '20202020312138', 'status' : 'serverUnavailable', 'service' : 'hostname'})

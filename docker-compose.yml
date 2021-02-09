@@ -1,0 +1,90 @@
+version: '3.4'
+
+x-xxx-common-services-config: &common-services-config
+  restart: always
+x-kafka-env: &kafka-env
+  KAFKA_BROKER_ID: 1
+  KAFKA_ADVERTISED_PORT: 9092
+  BROKER_ID_COMMAND: "hostname | cut -d'-' -f2"
+  KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
+  KAFKA_CREATE_TOPICS: "loggingsys:20:1,pushnotifications:10:1,invoicing:10:1,mailing:10:1,userupdates:10:1,orderupdates:10:1"
+  KAFKA_LISTENERS: "PLAINTEXT://:9092"
+
+services:
+
+  mysqldb:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+      # mysql_native_password is the default authentication plugin
+    #used for an account when no authentication plugin is explicitly mentioned
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: loggingsys
+      MYSQL_USER: springant
+      MYSQL_PASSWORD: DSBD2020!
+      MYSQL_ROOT_PASSWORD: mysecretpw
+    volumes:
+      - mystorage:/var/lib/mysql
+
+  loggingdocker:
+    image: loggingdocker
+    build:
+      context: . # path relativo da cui lancio il docker-compose verso il Dockerfile
+      dockerfile: loggingsys/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+    restart: always
+    environment:
+      MYSQL_HOST: mysqldb
+      MYSQL_USERNAME: springant
+      MYSQL_PASSWORD: DSBD2020!
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysqldb
+      PMA_USER: springant
+      PMA_PASSWORD: DSBD2020!
+    ports:
+      - "8088:80"
+
+  zoo:
+    <<: *common-services-config
+    image: library/zookeeper:3.4.13
+    #Deployamo un singolo broker kafka
+    environment:
+      ZOO_MY_ID: 1
+
+  kafka:
+    <<: *common-services-config
+    environment: *kafka-env
+    image: wurstmeister/kafka:2.11-2.0.0
+    #ports:
+    #  - "9092:9092"
+    #environment:
+    #  KAFKA_ADVERTISED_HOST_NAME: kafka # Produttori e consumatori contatteranno kafka a questo host
+     # KAFKA_ZOOKEEPER_CONNECT: zookeper:2181 # Hostname e porta del servizio zookeeper
+    #depends_on:
+     # - zookeper
+
+  fakeproducer:
+    image: pythontester
+    build:
+      context: fakeproducer/
+      dockerfile: Dockerfile
+    command: python3 start.sh
+
+
+  #fallback:
+  #  image: debian
+  #  command: sleep 36000
+    #volumes:
+    #  - myothervolume:/mnt
+
+volumes:
+  mystorage:
+  #myothervolume:
